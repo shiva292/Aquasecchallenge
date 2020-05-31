@@ -1,0 +1,63 @@
+#!/bin/bash
+#Ubuntu 16.04
+
+sudo chmod +777 Test1.sh
+
+#update the latest packages
+apt-get update
+
+#we have to turn off the swap space because Kubernetes will start throwing random errors 
+swapoff -a
+
+#install openshh-server
+apt-get install openssh-server
+
+#update the latest packages
+apt-get update
+
+#install Docker for  managing the containers in the cluster.
+apt-get install -y docker.io
+
+#Install packages to allow apt to use a repository over HTTPS
+apt-get install -y apt-transport-https curl
+
+# Add kubernerte’s official GPG key
+sudo curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+
+sudo echo "deb http://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+sudo apt-get update
+
+#5) Install the latest version of kubernetes, or go to the next step to install a specific version:
+
+sudo apt-get install -y kubelet kubeadm kubectl
+
+#7) kubeadm init in pod network
+
+sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+
+#8) after initialization , then do the following
+
+#Create  new .kube directory to store kubeconfig file. it allows to connect  kubectl into cluster
+$ mkdir -p $HOME/.kube
+
+#Copy admin configuration file into  directory we made.
+$ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+
+#Changeownership of file that we copied to be owned by the user and your group id. This is what allows you, a non-root user,  to interact with cluster.
+$ sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+#Start the networking 
+
+kubectl apply -f https://docs.projectcalico.org/v3.9/manifests/calico.yaml
+
+
+#10)By default, your cluster will not schedule pods on the master for security reasons. If you want to be able to schedule pods on the master,we have to apply taint to  node
+
+kubectl taint nodes --all node-role.kubernetes.io/master-
+
+#11)for checking the nodes in kubernetes
+
+kubectl get nodes
+
+echo "kubernetes is installed successfully.."

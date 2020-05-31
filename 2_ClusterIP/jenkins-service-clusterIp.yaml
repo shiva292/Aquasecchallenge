@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service           #it is of type service denoted by the kind field.
+metadata:
+  name: jenkins         #name of the service
+spec:
+  type: ClusterIP       #the Service is of type ClusterIP
+  ports:
+    - port: 8089        #port exposed by the service.
+      targetPort: 8089  #port to access on the Pods targeted by this service
+  externalIPs:
+    - 192.168.0.194
+  selector:
+    app: jenkins        #deployment name associated with this service
